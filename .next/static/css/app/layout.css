@@ -668,6 +668,9 @@ video {
 .h-9 {
   height: 2.25rem;
 }
+.h-\[360px\] {
+  height: 360px;
+}
 .w-12 {
   width: 3rem;
 }
@@ -820,6 +823,9 @@ video {
 }
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+.bg-\[radial-gradient\(circle_at_top_left\2c rgba\(34\2c 211\2c 238\2c 0\.2\)\2c transparent_30\%\)\2c radial-gradient\(circle_at_bottom_right\2c rgba\(167\2c 139\2c 250\2c 0\.18\)\2c transparent_25\%\)\] {
+  background-image: radial-gradient(circle at top left,rgba(34,211,238,0.2),transparent 30%),radial-gradient(circle at bottom right,rgba(167,139,250,0.18),transparent 25%);
 }
 .from-cyan-400 {
   --tw-gradient-from: #22d3ee var(--tw-gradient-from-position);
