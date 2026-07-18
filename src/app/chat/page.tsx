@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUp, MessageSquarePlus, Search, Sparkles, Trash2, Pin, PencilLine, Loader2 } from 'lucide-react';
+import { ArrowUp, MessageSquarePlus, Search, Sparkles, Trash2, PencilLine, Loader2, Copy, RefreshCw } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { createClient } from '@/lib/supabase/client';
 import { createChatRecord, deleteChat, getChatMessages, getChats, saveMessage, updateChatTitle } from '@/lib/supabase/chat';
 import { streamGeminiResponse } from '@/lib/gemini';
@@ -33,6 +37,7 @@ export default function ChatPage() {
   const [titleEditing, setTitleEditing] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -70,6 +75,10 @@ export default function ChatPage() {
     return () => authListener.subscription.unsubscribe();
   }, [supabase]);
 
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isGenerating]);
+
   const filteredChats = useMemo(() => chats.filter((chat) => chat.title.toLowerCase().includes(search.toLowerCase())), [chats, search]);
 
   const handleCreateChat = async () => {
@@ -84,8 +93,8 @@ export default function ChatPage() {
     }
   };
 
-  const handleSend = async () => {
-    const trimmed = draft.trim();
+  const sendMessage = async (content: string, replaceLastAssistant = false) => {
+    const trimmed = content.trim();
     if (!trimmed || !activeChatId || isGenerating) return;
 
     setIsGenerating(true);
@@ -93,7 +102,14 @@ export default function ChatPage() {
 
     const userMessage = { id: crypto.randomUUID(), role: 'user' as const, content: trimmed, created_at: new Date().toISOString() };
     const assistantPlaceholder = { id: crypto.randomUUID(), role: 'assistant' as const, content: '', created_at: new Date().toISOString() };
-    setMessages((prev) => [...prev, userMessage, assistantPlaceholder]);
+
+    setMessages((prev) => {
+      if (replaceLastAssistant && prev.length > 0) {
+        const withoutLast = prev.slice(0, -1);
+        return [...withoutLast, userMessage, assistantPlaceholder];
+      }
+      return [...prev, userMessage, assistantPlaceholder];
+    });
     setDraft('');
 
     try {
@@ -121,6 +137,16 @@ export default function ChatPage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleSend = async () => {
+    await sendMessage(draft);
+  };
+
+  const handleRegenerate = async () => {
+    const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
+    if (!lastUserMessage) return;
+    await sendMessage(lastUserMessage.content, true);
   };
 
   const handleRename = async (chatId: string) => {
@@ -211,10 +237,39 @@ export default function ChatPage() {
                   {messages.map((message) => (
                     <motion.div key={message.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[90%] rounded-[1.5rem] border px-4 py-3 sm:max-w-[75%] ${message.role === 'user' ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-50' : 'border-white/10 bg-white/5 text-slate-200'}`}>
-                        <div className="whitespace-pre-wrap text-sm leading-7">{message.content || (message.role === 'assistant' ? 'Thinking…' : '')}</div>
+                        {message.role === 'assistant' ? (
+                          <div className="flex items-center justify-end gap-2 pb-2">
+                            <button aria-label="Copy response" onClick={() => navigator.clipboard.writeText(message.content)} className="text-slate-400 transition hover:text-white"><Copy size={14} /></button>
+                            <button aria-label="Regenerate response" onClick={handleRegenerate} className="text-slate-400 transition hover:text-white"><RefreshCw size={14} /></button>
+                          </div>
+                        ) : null}
+                        <div className="text-sm leading-7">
+                          {message.role === 'assistant' && message.content ? (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                code({ inline, className, children, ...props }) {
+                                  const match = /language-(\w+)/.exec(className || '');
+                                  return !inline && match ? (
+                                    <SyntaxHighlighter style={oneDark as never} language={match[1]} PreTag="div" {...props}>
+                                      {String(children).replace(/\n$/, '')}
+                                    </SyntaxHighlighter>
+                                  ) : (
+                                    <code className={className} {...props}>{children}</code>
+                                  );
+                                },
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          ) : (
+                            <div className="whitespace-pre-wrap">{message.content || (message.role === 'assistant' ? 'Thinking…' : '')}</div>
+                          )}
+                        </div>
                       </div>
                     </motion.div>
                   ))}
+                  <div ref={endRef} />
                 </div>
               )}
             </div>
