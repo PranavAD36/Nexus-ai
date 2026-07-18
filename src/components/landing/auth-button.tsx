@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, getAuthRedirectUrl } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut, Sparkles } from 'lucide-react';
+import { LogOut, Sparkles } from 'lucide-react';
 
 export function AuthButton() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -29,7 +29,7 @@ export function AuthButton() {
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: getAuthRedirectUrl() },
     });
   };
 
