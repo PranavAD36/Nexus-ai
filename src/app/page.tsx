@@ -1,8 +1,12 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Orbit, ShieldCheck, Cpu, Layers3 } from 'lucide-react';
+import { ArrowRight, Sparkles, Orbit, ShieldCheck, Cpu, Layers3, Github, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { AuthButton } from '@/components/landing/auth-button';
+import { SectionShell } from '@/components/landing/section-shell';
+import { SpaceScene } from '@/components/landing/space-scene';
 
 const features = [
   {
@@ -25,9 +29,10 @@ const features = [
 const navItems = ['Home', 'Features', 'About', 'Contact'];
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main className="relative overflow-hidden bg-transparent">
-      <div className="absolute inset-0 -z-10 bg-aurora opacity-90" />
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute left-[-10%] top-[-10%] h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
         <div className="absolute right-[-5%] top-24 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl" />
@@ -56,26 +61,42 @@ export default function Home() {
               {item}
             </a>
           ))}
+          <a href="https://github.com" target="_blank" rel="noreferrer" className="transition hover:text-white" aria-label="GitHub">
+            <Github size={18} />
+          </a>
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="hidden sm:flex">
-            Theme
-          </Button>
-          <Button size="sm" className="rounded-full">
-            Get Started <ArrowRight size={16} />
+          <div className="hidden md:block">
+            <AuthButton />
+          </div>
+          <Button variant="ghost" size="sm" className="md:hidden" aria-label="Toggle menu" onClick={() => setMobileMenuOpen((prev) => !prev)}>
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </Button>
         </div>
       </motion.header>
 
+      {mobileMenuOpen ? (
+        <div className="mx-6 mb-4 rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300 backdrop-blur-xl md:hidden">
+          <div className="flex flex-col gap-3">
+            {navItems.map((item) => (
+              <a key={item} href={`#${item.toLowerCase()}`} className="transition hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                {item}
+              </a>
+            ))}
+            <a href="https://github.com" target="_blank" rel="noreferrer" className="transition hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+              GitHub
+            </a>
+            <div className="pt-2">
+              <AuthButton />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <section id="home" className="mx-auto flex max-w-7xl flex-col px-6 pb-24 pt-6 lg:px-8 lg:pb-32 lg:pt-10">
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="max-w-2xl"
-          >
+          <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.1 }} className="max-w-2xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-100 backdrop-blur-xl">
               <Sparkles size={14} />
               Premium AI experience, reimagined
@@ -96,12 +117,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative mx-auto w-full max-w-xl"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative mx-auto w-full max-w-xl">
             <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-cyan-400/20 via-transparent to-violet-500/20 blur-3xl" />
             <div className="relative rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-premium backdrop-blur-2xl">
               <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -125,30 +141,15 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 4.2, repeat: Infinity }} className="mt-6 rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-5">
-                <div className="flex items-center justify-between text-sm text-slate-400">
-                  <span>Holistic synthesis</span>
-                  <span>∞</span>
-                </div>
-                <div className="mt-4 h-2 rounded-full bg-white/10">
-                  <div className="h-2 w-3/4 rounded-full bg-gradient-to-r from-cyan-400 to-violet-500" />
-                </div>
-              </motion.div>
+              <div className="mt-6">
+                <SpaceScene />
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section id="features" className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-3">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Experience</p>
-            <h2 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">Crafted for visionary teams.</h2>
-          </div>
-          <Button variant="ghost" className="hidden sm:flex">
-            Discover more
-          </Button>
-        </div>
+      <SectionShell id="features" eyebrow="Experience" title="Crafted for visionary teams.">
         <div className="grid gap-6 md:grid-cols-3">
           {features.map((feature, index) => {
             const Icon = feature.icon;
@@ -173,28 +174,35 @@ export default function Home() {
             );
           })}
         </div>
-      </section>
+      </SectionShell>
 
-      <section id="about" className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-premium backdrop-blur-2xl sm:p-12">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">About</p>
-              <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">A sleek foundation for bold intelligent ideas.</h2>
-            </div>
-            <div className="space-y-4 text-slate-300">
-              <p className="text-lg leading-8">
-                Nexus-AI presents a striking launch point for products shaped by clarity, motion, and modern aesthetics.
-              </p>
-              <p className="leading-8">
-                Every surface is intentionally composed to feel calm, elevated, and ready for product storytelling.
-              </p>
-            </div>
+      <SectionShell id="about" eyebrow="Why Nexus-AI" title="A sleek foundation for bold intelligent ideas.">
+        <div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-8 shadow-premium backdrop-blur-xl">
+            <p className="text-lg leading-8 text-slate-300">
+              Nexus-AI presents a striking launch point for products shaped by clarity, motion, and modern aesthetics.
+            </p>
+          </div>
+          <div className="rounded-[1.75rem] border border-white/10 bg-gradient-to-br from-cyan-400/10 to-violet-500/10 p-8 shadow-premium backdrop-blur-xl">
+            <p className="text-lg leading-8 text-slate-200">
+              Every surface is intentionally composed to feel calm, elevated, and ready for product storytelling.
+            </p>
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <footer id="contact" className="mx-auto flex max-w-7xl flex-col gap-4 border-t border-white/10 px-6 py-8 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <SectionShell id="contact" eyebrow="Technology" title="Built with a graceful, scalable foundation.">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-8 shadow-premium backdrop-blur-xl">
+            <p className="text-lg leading-8 text-slate-300">Next.js, TypeScript, Tailwind, Framer Motion, Supabase, and Three.js combine to form a premium platform foundation.</p>
+          </div>
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-8 shadow-premium backdrop-blur-xl">
+            <p className="text-lg leading-8 text-slate-300">The structure is designed to scale cleanly as the product grows into a full AI platform.</p>
+          </div>
+        </div>
+      </SectionShell>
+
+      <footer className="mx-auto flex max-w-7xl flex-col gap-4 border-t border-white/10 px-6 py-8 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <p>© 2026 Nexus-AI. Designed for the future.</p>
         <div className="flex items-center gap-5">
           <a href="#home" className="transition hover:text-white">Home</a>
