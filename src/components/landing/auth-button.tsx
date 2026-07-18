@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { createClient, getAuthRedirectUrl } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
+import { getAuthRedirectUrl } from '@/lib/supabase/site-url';
 import { Button } from '@/components/ui/button';
 import { LogOut, Sparkles } from 'lucide-react';
 
