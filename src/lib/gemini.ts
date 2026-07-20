@@ -7,8 +7,6 @@ export interface GeminiMessage {
   content: string;
 }
 
-const apiKey = process.env.GEMINI_API_KEY;
-
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -23,12 +21,15 @@ export async function streamGeminiResponse(
   onChunk: (chunk: string) => void,
   signal?: AbortSignal
 ) {
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('Missing GEMINI_API_KEY');
   }
 
   const client = new GoogleGenerativeAI(apiKey);
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = client.getGenerativeModel({
+  model: "gemini-3-flash-preview",
+});
   const prompt = buildPrompt(messages);
 
   let attempt = 0;

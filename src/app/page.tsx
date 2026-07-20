@@ -2,11 +2,13 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Orbit, ShieldCheck, Cpu, Layers3, Github, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { AuthButton } from '@/components/landing/auth-button';
 import { SectionShell } from '@/components/landing/section-shell';
 import { SpaceScene } from '@/components/landing/space-scene';
+import { createClient } from '@/lib/supabase/client';
 
 const features = [
   {
@@ -29,7 +31,70 @@ const features = [
 const navItems = ['Home', 'Features', 'About', 'Contact'];
 
 export default function Home() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+
+  useEffect(() => {
+    const supabase = createClient();
+    let mounted = true;
+
+    const syncSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
+      if (session) {
+        router.replace('/chat');
+        setAuthState('authenticated');
+      } else {
+        setAuthState('unauthenticated');
+      }
+    };
+
+    void syncSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      if (session) {
+        router.replace('/chat');
+        setAuthState('authenticated');
+      } else {
+        setAuthState('unauthenticated');
+      }
+    });
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (authState === 'loading') {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 px-8 py-6 text-center">
+          <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Nexus-AI</p>
+          <p className="mt-3 text-lg font-medium">Preparing your workspace…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (authState !== 'authenticated') {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+        <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
+          <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Nexus-AI</p>
+          <h1 className="mt-4 text-3xl font-semibold">Sign in to continue</h1>
+          <p className="mt-3 text-sm leading-7 text-slate-400">
+            Access your workspace and chat history securely with your Google account.
+          </p>
+          <div className="mt-6">
+            <AuthButton />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative overflow-hidden bg-transparent">
