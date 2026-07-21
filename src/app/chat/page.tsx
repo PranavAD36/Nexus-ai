@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowUp, MessageSquarePlus, Search, Sparkles, Trash2, PencilLine, Loader2, Copy, RefreshCw } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowUp, Menu, Sparkles, LogOut, Settings2, PanelLeftClose, PanelLeftOpen, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { createChatRecord, deleteChat, getChatMessages, getChats, saveMessage, updateChatTitle } from '@/lib/supabase/chat';
+import { createChatRecord, deleteChat, getChatMessages, getChats, saveMessage, toggleChatPin, updateChatTitle } from '@/lib/supabase/chat';
 import { Button } from '@/components/ui/button';
+import { Sidebar } from '@/components/chat/sidebar';
+import { Composer } from '@/components/chat/composer';
+import { MessageBubble } from '@/components/chat/message-bubble';
+import { TypingIndicator } from '@/components/chat/typing-indicator';
 
 interface ChatMessage {
   id: string;
@@ -36,10 +37,14 @@ export default function ChatPage() {
   const [titleEditing, setTitleEditing] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
   const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [autoTitleApplied, setAutoTitleApplied] = useState<Record<string, boolean>>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const verifySession = async () => {
@@ -72,7 +77,7 @@ export default function ChatPage() {
     return () => {
       isMounted = false;
     };
-  }, [activeChatId]);
+  }, []);
 
   useEffect(() => {
     if (!activeChatId) {
@@ -99,15 +104,31 @@ export default function ChatPage() {
   }, [activeChatId]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isGenerating]);
+    endRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+  }, [messages, isGenerating, prefersReducedMotion]);
 
-  const filteredChats = useMemo(() => chats.filter((chat) => chat.title.toLowerCase().includes(search.toLowerCase())), [chats, search]);
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+    }
+  }, [draft]);
+
+  const filteredChats = useMemo(() => {
+    const query = search.toLowerCase();
+    return chats.filter((chat) => chat.title.toLowerCase().includes(query));
+  }, [chats, search]);
+
+  const currentChatTitle = useMemo(() => {
+    const currentChat = chats.find((chat) => chat.id === activeChatId);
+    return currentChat?.title ?? 'New conversation';
+  }, [activeChatId, chats]);
 
   const handleCreateChat = async () => {
     if (isCreatingChat) return;
     setIsCreatingChat(true);
     setError(null);
+    setShowSidebarOnMobile(false);
 
     try {
       const newChat = await createChatRecord('New Chat');
@@ -136,6 +157,7 @@ export default function ChatPage() {
 
     const userMessage = { id: crypto.randomUUID(), role: 'user' as const, content: trimmed, created_at: new Date().toISOString() };
     const assistantPlaceholder = { id: crypto.randomUUID(), role: 'assistant' as const, content: '', created_at: new Date().toISOString() };
+    const history = [...messages, userMessage];
 
     setMessages((prev) => {
       if (replaceLastAssistant && prev.length > 0) {
@@ -148,11 +170,10 @@ export default function ChatPage() {
 
     try {
       await saveMessage(activeChatId, 'user', trimmed);
-      const history = [...messages, userMessage].map((message) => ({ role: message.role, content: message.content }));
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history.map((message) => ({ role: message.role, content: message.content })) }),
       });
 
       if (!response.ok) {
@@ -184,8 +205,14 @@ export default function ChatPage() {
 
       streamed += decoder.decode();
       await saveMessage(activeChatId, 'assistant', streamed);
-      const updatedTitle = trimmed.length > 34 ? `${trimmed.slice(0, 34)}...` : trimmed;
-      await updateChatTitle(activeChatId, updatedTitle);
+
+      const currentChat = chats.find((chat) => chat.id === activeChatId);
+      if (!autoTitleApplied[activeChatId || ''] && currentChat && ['New Chat', 'Untitled chat', ''].includes(currentChat.title.trim())) {
+        const updatedTitle = trimmed.length > 34 ? `${trimmed.slice(0, 34)}...` : trimmed;
+        await updateChatTitle(activeChatId, updatedTitle);
+        setAutoTitleApplied((prev) => ({ ...prev, [activeChatId]: true }));
+      }
+
       const refresh = await getChats();
       setChats(refresh as ChatSummary[]);
     } catch (err) {
@@ -230,60 +257,96 @@ export default function ChatPage() {
     }
   };
 
+  const handlePin = async (chatId: string) => {
+    const target = chats.find((chat) => chat.id === chatId);
+    if (!target) return;
+    const pinned = !target.pinned;
+    const success = await toggleChatPin(chatId, pinned);
+    if (!success) return;
+    setChats((prev) => prev.map((chat) => (chat.id === chatId ? { ...chat, pinned } : chat)));
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/');
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-white">
-      <div className="mx-auto flex h-screen w-full max-w-7xl flex-col px-4 py-4 lg:px-6">
-        <div className="flex flex-1 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900">
-          <aside className="hidden w-80 flex-col border-r border-slate-800 bg-slate-950/70 p-4 lg:flex">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Nexus-AI</p>
-                <h2 className="mt-1 text-lg font-semibold">Workspace</h2>
-              </div>
-              <Button size="sm" onClick={handleCreateChat} disabled={isCreatingChat}>
-                {isCreatingChat ? <Loader2 className="animate-spin" size={16} /> : <MessageSquarePlus size={16} />}
-              </Button>
-            </div>
-            <div className="mt-4 flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-300">
-              <Search size={16} />
-              <input aria-label="Search chats" value={search} onChange={(event) => setSearch(event.target.value)} className="w-full bg-transparent outline-none" placeholder="Search chats" />
-            </div>
-            <div className="mt-5 flex-1 space-y-2 overflow-y-auto">
-              {filteredChats.map((chat) => (
-                <button key={chat.id} onClick={() => setActiveChatId(chat.id)} className={`flex w-full items-start justify-between rounded-2xl border px-3 py-3 text-left transition ${activeChatId === chat.id ? 'border-cyan-400/30 bg-cyan-400/10' : 'border-slate-800 bg-slate-900 hover:bg-slate-800'}`}>
-                  <div className="min-w-0">
-                    {titleEditing === chat.id ? (
-                      <input value={titleDraft} onChange={(event) => setTitleDraft(event.target.value)} onBlur={() => handleRename(chat.id)} className="w-full bg-transparent text-sm outline-none" autoFocus />
-                    ) : (
-                      <p className="truncate text-sm font-medium text-white">{chat.title}</p>
-                    )}
-                    <p className="mt-1 text-xs text-slate-400">{new Date(chat.updated_at).toLocaleDateString()}</p>
-                  </div>
-                  <div className="ml-2 flex gap-2">
-                    <button aria-label="Rename chat" onClick={(event) => { event.stopPropagation(); setTitleEditing(chat.id); setTitleDraft(chat.title); }}><PencilLine size={14} className="text-slate-400" /></button>
-                    <button aria-label="Delete chat" onClick={(event) => { event.stopPropagation(); handleDelete(chat.id); }}><Trash2 size={14} className="text-slate-400" /></button>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </aside>
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto flex h-screen max-w-7xl flex-col px-3 py-3 sm:px-4 lg:px-6">
+        <div className="flex flex-1 overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/80 shadow-[0_0_80px_rgba(6,10,20,0.35)] backdrop-blur-xl">
+          <Sidebar
+            chats={filteredChats}
+            activeChatId={activeChatId}
+            search={search}
+            onSearchChange={setSearch}
+            onCreateChat={handleCreateChat}
+            onSelectChat={setActiveChatId}
+            onRename={handleRename}
+            onDelete={handleDelete}
+            onTogglePin={handlePin}
+            onStartRename={(chatId) => {
+              setTitleEditing(chatId);
+              setTitleDraft(chats.find((chat) => chat.id === chatId)?.title ?? '');
+            }}
+            titleEditingId={titleEditing}
+            titleDraft={titleDraft}
+            onTitleDraftChange={setTitleDraft}
+            isCreatingChat={isCreatingChat}
+          />
 
           <div className="flex flex-1 flex-col">
-            <header className="flex items-center justify-between border-b border-white/10 p-4">
-              <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Conversation</p>
-                <h3 className="mt-1 text-lg font-semibold text-white">{activeChatId ? 'Live session' : 'Start a new conversation'}</h3>
-              </div>
+            <header className="flex items-center justify-between border-b border-white/10 px-3 py-3 sm:px-4">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat}>
+                <Button variant="ghost" size="sm" className="rounded-2xl lg:hidden" onClick={() => setShowSidebarOnMobile((prev) => !prev)}>
+                  {showSidebarOnMobile ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+                </Button>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-200/70">Conversation</p>
+                  <h3 className="mt-1 text-sm font-semibold text-white sm:text-base">{currentChatTitle}</h3>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat} className="rounded-2xl">
                   {isCreatingChat ? 'Creating…' : 'New Chat'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowSettings((prev) => !prev)} className="rounded-2xl">
+                  <Settings2 size={15} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-2xl">
+                  <LogOut size={15} />
                 </Button>
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+            {showSettings ? (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mx-3 mt-3 rounded-[1.3rem] border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300 shadow-[0_0_40px_rgba(15,23,42,0.2)] sm:mx-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Workspace settings</p>
+                    <p className="mt-1 text-xs text-slate-400">Theme, motion, and conversation controls.</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)} className="rounded-2xl">
+                    Close
+                  </Button>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Theme</p>
+                    <p className="mt-1 text-sm text-white">Dark mode is active by default.</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Animation</p>
+                    <p className="mt-1 text-sm text-white">Smooth motion is enabled for a premium feel.</p>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+
+            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
               {messages.length === 0 ? (
-                <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-950/60 p-8 text-center text-slate-300">
+                <div className="flex h-full items-center justify-center rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-8 text-center text-slate-300">
                   <div>
                     <Sparkles className="mx-auto mb-3 text-cyan-200" size={28} />
                     <p className="text-lg text-white">Your next conversation begins here.</p>
@@ -292,71 +355,35 @@ export default function ChatPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[90%] rounded-2xl border px-4 py-3 sm:max-w-[75%] ${message.role === 'user' ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-50' : 'border-slate-800 bg-slate-950/80 text-slate-200'}`}>
-                        {message.role === 'assistant' ? (
-                          <div className="flex items-center justify-end gap-2 pb-2">
-                            <button aria-label="Copy response" onClick={() => navigator.clipboard.writeText(message.content)} className="text-slate-400 transition hover:text-white"><Copy size={14} /></button>
-                            <button aria-label="Regenerate response" onClick={handleRegenerate} className="text-slate-400 transition hover:text-white"><RefreshCw size={14} /></button>
-                          </div>
-                        ) : null}
-                        <div className="text-sm leading-7">
-                          {message.role === 'assistant' && message.content ? (
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                code({ className, children, ...props }: { className?: string; children?: React.ReactNode }) {
-                                  const match = /language-(\w+)/.exec(className || '');
-                                  const childText = String(children ?? '').replace(/\n$/, '');
-                                  return match ? (
-                                    <SyntaxHighlighter style={oneDark as never} language={match[1]} PreTag="div" {...props}>
-                                      {childText}
-                                    </SyntaxHighlighter>
-                                  ) : (
-                                    <code className={className} {...props}>{children}</code>
-                                  );
-                                },
-                              }}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
-                          ) : (
-                            <div className="whitespace-pre-wrap">{message.content || (message.role === 'assistant' ? 'Thinking…' : '')}</div>
-                          )}
-                        </div>
+                  {messages.map((message, index) => {
+                    const isLastAssistant = message.role === 'assistant' && index === messages.length - 1 && isGenerating && !message.content;
+                    return (
+                      <div key={message.id}>
+                        {isLastAssistant ? <TypingIndicator /> : <MessageBubble role={message.role} content={message.content} onCopy={() => navigator.clipboard.writeText(message.content)} onRegenerate={handleRegenerate} />}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={endRef} />
                 </div>
               )}
             </div>
 
-            <div className="border-t border-white/10 p-4">
+            <div className="border-t border-white/10 px-3 py-3 sm:px-4 sm:py-4">
               {error ? <p className="mb-3 text-sm text-rose-300">{error}</p> : null}
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-                <textarea
-                  ref={textareaRef}
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && !event.shiftKey) {
-                      event.preventDefault();
-                      void handleSend();
-                    }
-                  }}
-                  placeholder="Ask Nexus-AI anything..."
-                  className="min-h-[100px] w-full resize-none bg-transparent px-2 py-2 text-sm outline-none"
-                  disabled={isGenerating}
-                />
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="text-xs text-slate-400">Enter to send · Shift + Enter for new line</p>
-                  <Button size="sm" onClick={() => void handleSend()} disabled={isGenerating || !draft.trim()}>
-                    {isGenerating ? <Loader2 className="animate-spin" size={16} /> : <ArrowUp size={16} />}
-                  </Button>
-                </div>
-              </div>
+              <Composer
+                textareaRef={textareaRef}
+                draft={draft}
+                onDraftChange={setDraft}
+                onSend={handleSend}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    void handleSend();
+                  }
+                }}
+                isGenerating={isGenerating}
+                disabled={false}
+              />
             </div>
           </div>
         </div>

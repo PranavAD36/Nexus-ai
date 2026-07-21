@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NEXUS_AI_SYSTEM_PROMPT } from '@/lib/ai/system-prompt';
 
 export type GeminiRole = 'user' | 'assistant';
 
@@ -27,16 +28,16 @@ export async function streamGeminiResponse(
   }
 
   const client = new GoogleGenerativeAI(apiKey);
-const model = client.getGenerativeModel({
-  model: "gemini-3-flash-preview",
-});
+  const model = client.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+  });
   const prompt = buildPrompt(messages);
 
   let attempt = 0;
   while (attempt < 3) {
     try {
       const result = await model.generateContentStream({
-        contents: [{ role: 'user', parts: [{ text: `You are Nexus-AI, a concise and polished assistant. Respond helpfully and clearly.\n\n${prompt}` }] }],
+        contents: [{ role: 'user', parts: [{ text: `${NEXUS_AI_SYSTEM_PROMPT}\n\nConversation:\n${prompt}` }] }],
       });
 
       let fullText = '';

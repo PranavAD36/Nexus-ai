@@ -116,3 +116,17 @@ export async function deleteChat(chatId: string) {
     return false;
   }
 }
+
+export async function toggleChatPin(chatId: string, pinned: boolean) {
+  const supabase = createClient();
+  const user = await getAuthenticatedUser();
+  if (!user) return false;
+
+  try {
+    const { error } = await supabase.from('chats').update({ pinned, updated_at: new Date().toISOString() }).eq('id', chatId).eq('user_id', user.id);
+    if (error) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
