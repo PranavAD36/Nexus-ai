@@ -51,7 +51,7 @@ export function Sidebar({
   isLoading = false,
 }: SidebarProps) {
   return (
-    <aside className={`${isMobileVisible ? 'fixed inset-y-0 left-0 z-50 flex w-full max-w-[320px] flex-col border-r border-white/10 bg-slate-950/95 p-4 shadow-2xl backdrop-blur-xl lg:relative lg:block lg:w-[290px]' : 'hidden lg:flex'}`}>
+    <aside className={isMobileVisible ? 'fixed inset-y-0 left-0 z-50 flex w-full max-w-[320px] flex-col border-r border-white/10 bg-slate-950/95 p-4 shadow-2xl backdrop-blur-xl lg:relative lg:block lg:w-[290px]' : 'hidden lg:flex'}>
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.35em] text-slate-400">Nexus-AI</p>
@@ -122,57 +122,58 @@ export function Sidebar({
                   : 'border-white/10 bg-slate-900/70 hover:bg-slate-800/80'
               }`}
             >
-            <div className="min-w-0">
-              {titleEditingId === chat.id ? (
-                <input
-                  value={titleDraft}
-                  onChange={(event) => onTitleDraftChange(event.target.value)}
-                  onBlur={() => onRename(chat.id)}
-                  className="w-full bg-transparent text-sm font-medium text-white outline-none"
-                  autoFocus
-                />
-              ) : (
-                <p className="truncate text-sm font-medium text-white">{chat.title}</p>
-              )}
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
-                <Sparkles size={12} className="text-violet-300" />
-                {new Date(chat.updated_at).toLocaleDateString()}
+              <div className="min-w-0">
+                {titleEditingId === chat.id ? (
+                  <input
+                    value={titleDraft}
+                    onChange={(event) => onTitleDraftChange(event.target.value)}
+                    onBlur={() => onRename(chat.id)}
+                    className="w-full bg-transparent text-sm font-medium text-white outline-none"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="truncate text-sm font-medium text-white">{chat.title}</p>
+                )}
+                <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
+                  <Sparkles size={12} className="text-violet-300" />
+                  {new Date(chat.updated_at).toLocaleDateString()}
+                </div>
               </div>
-            </div>
-            <div className="ml-2 flex gap-2">
-              <button
-                aria-label="Pin chat"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onTogglePin?.(chat.id);
-                }}
-                className="text-slate-400 transition hover:text-white"
-              >
-                {chat.pinned ? <Pin size={14} /> : <PinOff size={14} />}
-              </button>
-              <button
-                aria-label="Rename chat"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onStartRename(chat.id);
-                }}
-                className="text-slate-400 transition hover:text-white"
-              >
-                <PencilLine size={14} />
-              </button>
-              <button
-                aria-label="Delete chat"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onDelete(chat.id);
-                }}
-                className="text-slate-400 transition hover:text-white"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          </motion.button>
-        ))}
+              <div className="ml-2 flex gap-2">
+                <button
+                  aria-label="Pin chat"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onTogglePin?.(chat.id);
+                  }}
+                  className="text-slate-400 transition hover:text-white"
+                >
+                  {chat.pinned ? <Pin size={14} /> : <PinOff size={14} />}
+                </button>
+                <button
+                  aria-label="Rename chat"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onStartRename(chat.id);
+                  }}
+                  className="text-slate-400 transition hover:text-white"
+                >
+                  <PencilLine size={14} />
+                </button>
+                <button
+                  aria-label="Delete chat"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete(chat.id);
+                  }}
+                  className="text-slate-400 transition hover:text-white"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </motion.button>
+          ))
+        )}
       </div>
     </aside>
   );
