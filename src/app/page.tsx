@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Sparkles, Orbit, ShieldCheck, Cpu, Layers3, Github, Menu, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { AuthButton } from '@/components/landing/auth-button';
@@ -35,9 +35,17 @@ export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+
+  const getSupabase = () => {
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient();
+    }
+    return supabaseRef.current;
+  };
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = getSupabase();
     let mounted = true;
 
     const syncSession = async () => {

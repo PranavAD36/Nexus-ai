@@ -1,6 +1,6 @@
   "use client";
 
-  import { useEffect, useState } from 'react';
+  import { useEffect, useRef, useState } from 'react';
   import { createClient } from '@/lib/supabase/client';
   import { getAuthRedirectUrl } from '@/lib/supabase/site-url';
   import { Button } from '@/components/ui/button';
@@ -9,13 +9,18 @@
   export function AuthButton() {
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
-    useEffect(() => {
-      const getSession = async () => {
-        const { data } = await supabase.auth.getSession();
-        setIsSignedIn(Boolean(data.session));
-        setLoading(false);
+  const getSupabase = () => {
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient();
+    }
+    return supabaseRef.current;
+  };
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await getSupabase().auth.getSession();
       };
 
       getSession();
@@ -28,14 +33,14 @@
     }, [supabase]);
 
     const signInWithGoogle = async () => {
-      await supabase.auth.signInWithOAuth({
+      await getSupabase().auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: getAuthRedirectUrl() },
       });
     };
 
     const signOut = async () => {
-      await supabase.auth.signOut();
+      await getSupabase().auth.signOut();
     };
 
     if (loading) {

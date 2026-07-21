@@ -45,11 +45,19 @@ export default function ChatPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const getSupabase = () => {
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient();
+    }
+    return supabaseRef.current;
+  };
 
   useEffect(() => {
     const verifySession = async () => {
+      const supabase = getSupabase();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.replace('/');
@@ -57,7 +65,7 @@ export default function ChatPage() {
     };
 
     void verifySession();
-  }, [router, supabase]);
+  }, [router]);
 
   useEffect(() => {
     let isMounted = true;
@@ -319,6 +327,7 @@ export default function ChatPage() {
   };
 
   const handleLogout = async () => {
+    const supabase = getSupabase();
     await supabase.auth.signOut();
     router.replace('/');
   };
