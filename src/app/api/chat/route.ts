@@ -16,16 +16,15 @@ export async function POST(request: Request) {
           controller.close();
         } catch (err) {
           console.error("Gemini Stream Error:", err);
+          const message = err instanceof Error ? err.message : "Unknown Gemini Error";
+          const isQuota = /quota|429|rate limit|too many requests|quota exceeded/i.test(message);
+          const errorPayload = {
+            error: isQuota
+              ? 'AI service is temporarily unavailable due to API quota limits. Please try again in a few minutes.'
+              : message,
+          };
 
-          controller.enqueue(
-            encoder.encode(
-              JSON.stringify({
-                error:
-                  err instanceof Error ? err.message : "Unknown Gemini Error",
-              })
-            )
-          );
-
+          controller.enqueue(encoder.encode(`__ERROR__:${JSON.stringify(errorPayload)}`));
           controller.close();
         }
       },
@@ -38,13 +37,17 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error("Route Error:", err);
+    const message = err instanceof Error ? err.message : 'Unknown Error';
+    const isQuota = /quota|429|rate limit|too many requests|quota exceeded/i.test(message);
 
     return Response.json(
       {
-        error: err instanceof Error ? err.message : "Unknown Error",
+        error: isQuota
+          ? 'AI service is temporarily unavailable due to API quota limits. Please try again in a few minutes.'
+          : message,
       },
       {
-        status: 500,
+        status: isQuota ? 503 : 500,
       }
     );
   }

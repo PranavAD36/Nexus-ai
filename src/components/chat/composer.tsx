@@ -41,7 +41,7 @@ export function Composer({ draft, onDraftChange, onSend, onKeyDown, isGenerating
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-cyan-100 sm:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-violet-400/20 bg-violet-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-violet-100 sm:flex">
             <Sparkles size={12} />
             Stream ready
           </div>

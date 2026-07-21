@@ -153,32 +153,32 @@ export default function Home() {
         <section id="home" className="mx-auto flex max-w-7xl flex-col px-6 pb-24 pt-6 lg:px-8 lg:pb-32 lg:pt-10">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <motion.div initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="max-w-2xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-100 backdrop-blur-xl">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-sm text-violet-100 backdrop-blur-xl">
                 <Sparkles size={14} />
                 Premium AI experience, reimagined
               </div>
               <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-7xl">
                 Nexus-AI
               </h1>
-              <p className="mt-4 text-2xl font-medium text-cyan-100/90 sm:text-3xl">
+              <p className="mt-4 text-2xl font-medium text-violet-100/90 sm:text-3xl">
                 The next generation AI assistant.
               </p>
               <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl">
                 A beautifully crafted workspace for focused conversations, elegant automation, and quietly powerful AI support.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Button size="lg" className="group" onClick={() => router.push('/chat')}>
+                <Button size="lg" className="group rounded-[1.35rem] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500 px-7 py-4 text-white shadow-[0_24px_80px_rgba(124,58,237,0.14)]" onClick={() => router.push('/chat')}>
                   Start Chat <ArrowRight className="transition group-hover:translate-x-1" size={18} />
                 </Button>
-                <Button variant="secondary" size="lg" onClick={() => router.push('/chat')}>
+                <Button variant="secondary" size="lg" className="rounded-[1.35rem]" onClick={() => router.push('/chat')}>
                   Login
                 </Button>
               </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="relative mx-auto w-full max-w-xl">
-              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-cyan-400/20 via-transparent to-violet-500/20 blur-3xl" />
-              <div className="relative rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_80px_rgba(34,211,238,0.14)] backdrop-blur-2xl">
+              <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.26),transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.2),transparent_25%)] blur-3xl" />
+              <div className="relative rounded-[2rem] border border-white/10 bg-slate-950/75 p-6 shadow-[0_0_90px_rgba(99,102,241,0.18)] backdrop-blur-2xl">
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
                   <div>
                     <p className="text-sm text-slate-400">Signal status</p>

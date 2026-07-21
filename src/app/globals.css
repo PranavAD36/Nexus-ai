@@ -9,13 +9,14 @@
 body {
   @apply min-h-screen bg-background text-foreground antialiased;
   background-image:
-    radial-gradient(circle at top left, rgba(34, 211, 238, 0.15), transparent 24%),
-    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.16), transparent 20%),
-    linear-gradient(135deg, #030712 0%, #04070d 50%, #020617 100%);
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 22%),
+    radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.18), transparent 18%),
+    linear-gradient(135deg, #05070b 0%, #060814 45%, #03040b 100%);
+  background-attachment: fixed;
 }
 
 ::selection {
-  @apply bg-cyan-400/40 text-white;
+  @apply bg-violet-400/40 text-white;
 }
 
 html {

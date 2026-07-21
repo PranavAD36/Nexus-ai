@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowUp, Menu, Sparkles, LogOut, Settings2, PanelLeftClose, PanelLeftOpen, Loader2 } from 'lucide-react';
+import { ArrowUp, Menu, Sparkles, LogOut, Settings2, PanelLeftClose, PanelLeftOpen, AlertTriangle, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { createChatRecord, deleteChat, getChatMessages, getChats, saveMessage, toggleChatPin, updateChatTitle } from '@/lib/supabase/chat';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,8 @@ export default function ChatPage() {
   const [titleEditing, setTitleEditing] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
   const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const [isChatsLoading, setIsChatsLoading] = useState(true);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [autoTitleApplied, setAutoTitleApplied] = useState<Record<string, boolean>>({});
@@ -60,6 +62,7 @@ export default function ChatPage() {
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
+      setIsChatsLoading(true);
       try {
         const chatList = await getChats();
         if (!isMounted) return;
@@ -70,6 +73,10 @@ export default function ChatPage() {
       } catch {
         if (isMounted) {
           setError('Unable to load chats.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsChatsLoading(false);
         }
       }
     };
@@ -87,6 +94,7 @@ export default function ChatPage() {
 
     let isMounted = true;
     const loadMessages = async () => {
+      setIsMessagesLoading(true);
       try {
         const chatMessages = await getChatMessages(activeChatId);
         if (!isMounted) return;
@@ -94,6 +102,10 @@ export default function ChatPage() {
       } catch {
         if (isMounted) {
           setError('Unable to load messages.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsMessagesLoading(false);
         }
       }
     };
@@ -188,11 +200,33 @@ export default function ChatPage() {
 
       const decoder = new TextDecoder();
       let streamed = '';
+      let streamError: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        streamed += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        streamed += chunk;
+
+        const errorPrefix = '__ERROR__:';
+        const errorIndex = streamed.indexOf(errorPrefix);
+        if (errorIndex !== -1) {
+          const contentPart = streamed.slice(0, errorIndex);
+          const errorText = streamed.slice(errorIndex + errorPrefix.length);
+
+          if (errorText.trim().endsWith('}')) {
+            try {
+              const payload = JSON.parse(errorText);
+              streamError = payload.error;
+            } catch {
+              streamError = 'AI service is temporarily unavailable. Please try again.';
+            }
+
+            streamed = contentPart;
+            break;
+          }
+        }
+
         setMessages((prev) => {
           const next = [...prev];
           const target = next[next.length - 1];
@@ -201,6 +235,17 @@ export default function ChatPage() {
           }
           return next;
         });
+      }
+
+      if (streamError) {
+        setMessages((prev) => {
+          const next = [...prev];
+          if (next[next.length - 1]?.role === 'assistant') {
+            next.pop();
+          }
+          return next;
+        });
+        throw new Error(streamError);
       }
 
       streamed += decoder.decode();
@@ -227,6 +272,13 @@ export default function ChatPage() {
   };
 
   const handleRegenerate = async () => {
+    const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
+    if (!lastUserMessage) return;
+    await sendMessage(lastUserMessage.content, true);
+  };
+
+  const handleRetry = async () => {
+    setError(null);
     const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
     if (!lastUserMessage) return;
     await sendMessage(lastUserMessage.content, true);
@@ -293,6 +345,9 @@ export default function ChatPage() {
             titleDraft={titleDraft}
             onTitleDraftChange={setTitleDraft}
             isCreatingChat={isCreatingChat}
+            isMobileVisible={showSidebarOnMobile}
+            onClose={() => setShowSidebarOnMobile(false)}
+            isLoading={isChatsLoading}
           />
 
           <div className="flex flex-1 flex-col">
@@ -345,10 +400,23 @@ export default function ChatPage() {
             ) : null}
 
             <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
-              {messages.length === 0 ? (
+              {isMessagesLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="animate-pulse rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-6">
+                      <div className="mb-4 h-4 w-3/4 rounded-full bg-slate-800" />
+                      <div className="space-y-3">
+                        <div className="h-3 w-full rounded-full bg-slate-800" />
+                        <div className="h-3 w-5/6 rounded-full bg-slate-800" />
+                        <div className="h-3 w-2/3 rounded-full bg-slate-800" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-8 text-center text-slate-300">
                   <div>
-                    <Sparkles className="mx-auto mb-3 text-cyan-200" size={28} />
+                    <Sparkles className="mx-auto mb-3 text-violet-300" size={28} />
                     <p className="text-lg text-white">Your next conversation begins here.</p>
                     <p className="mt-2 text-sm text-slate-400">Ask anything and Nexus-AI will respond in real time.</p>
                   </div>
@@ -369,7 +437,22 @@ export default function ChatPage() {
             </div>
 
             <div className="border-t border-white/10 px-3 py-3 sm:px-4 sm:py-4">
-              {error ? <p className="mb-3 text-sm text-rose-300">{error}</p> : null}
+              {error ? (
+                <div className="mb-4 rounded-[1.4rem] border border-rose-400/10 bg-rose-500/10 p-4 text-sm text-white shadow-[0_0_40px_rgba(220,38,38,0.12)]">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle size={20} className="mt-0.5 text-rose-300" />
+                    <div>
+                      <p className="font-semibold">AI service is temporarily unavailable.</p>
+                      <p className="mt-1 text-sm text-slate-300">{error}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button variant="secondary" size="sm" onClick={handleRetry} className="rounded-2xl">
+                      Retry
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
               <Composer
                 textareaRef={textareaRef}
                 draft={draft}
