@@ -25,10 +25,10 @@ export function MessageBubble({ role, content, onCopy, onRegenerate }: MessageBu
       className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[92%] rounded-[1.35rem] border px-4 py-3 shadow-[0_0_30px_rgba(15,23,42,0.16)] sm:max-w-[78%] ${
+        className={`max-w-[92%] rounded-[1.15rem] border px-4 py-3 shadow-[0_6px_30px_rgba(2,6,23,0.6)] sm:max-w-[78%] ${
           role === 'user'
-            ? 'border-zinc-400/20 bg-gradient-to-br from-zinc-200/15 to-zinc-500/10 text-zinc-50'
-            : 'border-white/10 bg-zinc-900/80 text-zinc-100'
+            ? 'border-transparent bg-gradient-to-br from-violet-700/40 to-indigo-700/30 text-white'
+            : 'border-white/8 bg-zinc-900/85 text-zinc-100'
         }`}
       >
         {isAssistant && content ? (
@@ -51,9 +51,11 @@ export function MessageBubble({ role, content, onCopy, onRegenerate }: MessageBu
                   const match = /language-(\w+)/.exec(className || '');
                   const childText = String(children ?? '').replace(/\n$/, '');
                   return match ? (
-                    <SyntaxHighlighter style={oneDark as never} language={match[1]} PreTag="div" {...props}>
-                      {childText}
-                    </SyntaxHighlighter>
+                    <div className="rounded-md overflow-hidden">
+                      <SyntaxHighlighter style={oneDark as never} language={match[1]} PreTag="div" {...props}>
+                        {childText}
+                      </SyntaxHighlighter>
+                    </div>
                   ) : (
                     <code className={className} {...props}>{children}</code>
                   );

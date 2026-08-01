@@ -1,7 +1,7 @@
   "use client";
 
   import { useEffect, useRef, useState } from 'react';
-  import { createClient } from '@/lib/supabase/client';
+  import { createClient, resetClient } from '@/lib/supabase/client';
   import { getAuthRedirectUrl } from '@/lib/supabase/site-url';
   import { Button } from '@/components/ui/button';
   import { LogOut, Sparkles } from 'lucide-react';
@@ -37,20 +37,25 @@
     const signInWithGoogle = async () => {
       await getSupabase().auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: getAuthRedirectUrl() },
+        options: {
+          redirectTo: getAuthRedirectUrl(),
+          queryParams: { prompt: 'select_account' },
+        },
       });
     };
 
     const signOut = async () => {
       const supabase = getSupabase();
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'global' });
       await supabase.auth.getSession();
       if (typeof window !== 'undefined') {
         window.localStorage.clear();
         window.sessionStorage.clear();
       }
+      resetClient();
       setIsSignedIn(false);
       setLoading(false);
+      window.location.assign('/');
     };
 
     if (loading) {

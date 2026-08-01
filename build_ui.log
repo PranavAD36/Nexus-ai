@@ -1,0 +1,215 @@
+
+> nexus-ai@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.15
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/6) ...
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+   Generating static pages (1/6) 
+   Generating static pages (2/6) 
+   Generating static pages (4/6) 
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:150268)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '2883994405'
+}
+Error: Could not find the module "s:\project\Nexus-ai\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138149)
+    at Object.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:150268)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1213085605'
+}
+Error: Could not find the module "s:\project\Nexus-ai\src\components\theme-provider.tsx#ThemeProvider" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138149)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:150268)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '2916308809'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:150268)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1109744101'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:150268)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1518248645'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\app-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '933302859'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '398844619'
+}
+Error: Could not find the module "s:\project\Nexus-ai\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138149)
+    at Object.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1014426571'
+}
+Error: Could not find the module "s:\project\Nexus-ai\src\components\theme-provider.tsx#ThemeProvider" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:138149)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '2904541671'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1765034635'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '1931200235'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\error-boundary.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Object.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '2415325287'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\app-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '933302859'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\app-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Array.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '933302859'
+}
+Error: Could not find the module "s:\project\Nexus-ai\node_modules\next\dist\client\components\error-boundary.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at eb (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:136574)
+    at ek (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:140197)
+    at Object.toJSON (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135626)
+    at stringify (<anonymous>)
+    at eP (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142090)
+    at eE (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:142569)
+    at Timeout._onTimeout (s:\project\Nexus-ai\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:12:135346)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  digest: '2415325287'
+}
+[Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+  digest: '933302859'
+}
+
+Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+
+Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.
+ ✓ Generating static pages (6/6)
+
+> Export encountered errors on following paths:
+	/page: /

@@ -12,6 +12,10 @@ export function getAuthRedirectUrl() {
   return `${getSiteUrl()}/auth/callback`;
 }
 
+export function resetClient() {
+  browserClient = null;
+}
+
 export function createClient() {
   if (!browserClient) {
     browserClient = createBrowserClient(

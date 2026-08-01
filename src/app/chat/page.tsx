@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUp, Menu, Sparkles, LogOut, Settings2, PanelLeftClose, PanelLeftOpen, AlertTriangle, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, resetClient } from '@/lib/supabase/client';
 import { createChatRecord, deleteChat, getChatMessages, getChats, saveMessage, toggleChatPin, updateChatTitle } from '@/lib/supabase/chat';
 import { Button } from '@/components/ui/button';
-import { Sidebar } from '@/components/chat/sidebar';
+import { WorkspaceSidebar, ConversationSidebar } from '@/components/chat/sidebar';
 import { Composer } from '@/components/chat/composer';
 import { MessageBubble } from '@/components/chat/message-bubble';
 import { TypingIndicator } from '@/components/chat/typing-indicator';
@@ -39,7 +39,6 @@ export default function ChatPage() {
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [isChatsLoading, setIsChatsLoading] = useState(true);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
-  const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [autoTitleApplied, setAutoTitleApplied] = useState<Record<string, boolean>>({});
@@ -162,7 +161,7 @@ export default function ChatPage() {
     if (isCreatingChat) return;
     setIsCreatingChat(true);
     setError(null);
-    setShowSidebarOnMobile(false);
+    setIsGenerating(false);
 
     try {
       const newChat = await createChatRecord('New Chat');
@@ -216,7 +215,7 @@ export default function ChatPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unable to get a response.' }));
-        throw new Error(errorData.error || 'Unable to get a response.');
+        throw new Error('AI service is temporarily unavailable. Please try again later.');
       }
 
       const reader = response.body?.getReader();
@@ -243,9 +242,9 @@ export default function ChatPage() {
           if (errorText.trim().endsWith('}')) {
             try {
               const payload = JSON.parse(errorText);
-              streamError = payload.error;
+              streamError = 'AI service is temporarily unavailable. Please try again later.';
             } catch {
-              streamError = 'AI service is temporarily unavailable. Please try again.';
+              streamError = 'AI service is temporarily unavailable. Please try again later.';
             }
 
             streamed = contentPart;
@@ -287,7 +286,7 @@ export default function ChatPage() {
       const refresh = await getChats();
       setChats(refresh as ChatSummary[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error.');
+      setError('AI service is temporarily unavailable. Please try again later.');
     } finally {
       setIsGenerating(false);
     }
@@ -346,19 +345,28 @@ export default function ChatPage() {
 
   const handleLogout = async () => {
     const supabase = getSupabase();
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'global' });
     if (typeof window !== 'undefined') {
       window.localStorage.clear();
       window.sessionStorage.clear();
     }
-    router.replace('/');
+    resetClient();
+    window.location.assign('/');
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(161,161,170,0.16),transparent_24%),linear-gradient(135deg,_#09090b_0%,_#111827_45%,_#18181b_100%)] text-zinc-100">
-      <div className="mx-auto flex h-screen max-w-7xl flex-col px-2 py-2 sm:px-3 lg:px-4">
-        <div className="flex flex-1 overflow-hidden rounded-[1.85rem] border border-white/10 bg-zinc-950/80 shadow-[0_0_120px_rgba(2,6,23,0.35)] backdrop-blur-xl">
-          <Sidebar
+      <div className="mx-auto flex h-screen max-w-7xl flex-col px-1.5 py-1.5 sm:px-2 lg:px-3">
+        <div className="flex flex-1 overflow-hidden rounded-[1.45rem] border border-white/10 bg-zinc-950/80 shadow-[0_0_120px_rgba(2,6,23,0.35)] backdrop-blur-xl">
+          <WorkspaceSidebar
+            chats={chats}
+            onCreateChat={handleCreateChat}
+            isCreatingChat={isCreatingChat}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+          />
+
+          <ConversationSidebar
             chats={filteredChats}
             activeChatId={activeChatId}
             search={search}
@@ -375,20 +383,12 @@ export default function ChatPage() {
             titleEditingId={titleEditing}
             titleDraft={titleDraft}
             onTitleDraftChange={setTitleDraft}
-            isCreatingChat={isCreatingChat}
-            isMobileVisible={showSidebarOnMobile}
-            onClose={() => setShowSidebarOnMobile(false)}
             isLoading={isChatsLoading}
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
           />
 
-          <div className="flex flex-1 flex-col">
-            <header className="flex items-center justify-between border-b border-white/10 bg-zinc-900/60 px-3 py-3 sm:px-4">
+          <div className="flex flex-1 flex-col min-w-0">
+            <header className="flex items-center justify-between border-b border-white/10 bg-zinc-900/60 px-2.5 py-2.5 sm:px-3">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="rounded-2xl lg:hidden" onClick={() => setShowSidebarOnMobile((prev) => !prev)} aria-label="Toggle sidebar">
-                  {showSidebarOnMobile ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-                </Button>
                 <Button variant="ghost" size="sm" className="hidden rounded-2xl lg:flex" onClick={() => setIsSidebarCollapsed((prev) => !prev)} aria-label="Collapse sidebar">
                   {isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
                 </Button>
@@ -399,7 +399,7 @@ export default function ChatPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat} className="rounded-2xl border border-white/10 bg-white/5 px-3 text-sm">
+                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat} className="rounded-2xl border border-violet-400/25 bg-violet-500/15 px-3 text-sm text-violet-50">
                   {isCreatingChat ? 'Creating…' : 'New Chat'}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowSettings((prev) => !prev)} className="rounded-2xl" aria-label="Open settings">
@@ -435,32 +435,39 @@ export default function ChatPage() {
               </motion.div>
             ) : null}
 
-            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
+            <div className="flex-1 overflow-y-auto px-2 py-2 sm:px-3 sm:py-3">
               {isMessagesLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((index) => (
-                    <div key={index} className="animate-pulse rounded-[1.5rem] border border-white/10 bg-zinc-900/70 p-6">
-                      <div className="mb-4 h-4 w-3/4 rounded-full bg-zinc-800" />
+                    <div key={index} className="rounded-[1.25rem] border border-white/8 bg-zinc-900/75 p-6 shadow-[0_6px_30px_rgba(2,6,23,0.5)]">
+                      <div className="mb-4 h-4 w-3/4 rounded-full bg-gradient-to-r from-zinc-700 to-zinc-800 animate-pulse" />
                       <div className="space-y-3">
-                        <div className="h-3 w-full rounded-full bg-zinc-800" />
-                        <div className="h-3 w-5/6 rounded-full bg-zinc-800" />
-                        <div className="h-3 w-2/3 rounded-full bg-zinc-800" />
+                        <div className="h-3 w-full rounded-full bg-zinc-800 animate-pulse" />
+                        <div className="h-3 w-5/6 rounded-full bg-zinc-800 animate-pulse" />
+                        <div className="h-3 w-2/3 rounded-full bg-zinc-800 animate-pulse" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex h-full items-center justify-center rounded-[1.55rem] border border-dashed border-white/10 bg-zinc-900/50 p-8 text-center text-zinc-300">
-                  <div className="max-w-md">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-violet-200">
-                      <Sparkles size={24} />
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.36 }} className="flex h-full items-center justify-center rounded-[1.55rem] border border-dashed border-white/10 bg-zinc-900/50 p-8 text-center text-zinc-300">
+                  <div className="max-w-2xl">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-800 to-zinc-900 text-violet-200 shadow-md">
+                      <Sparkles size={26} />
                     </div>
-                    <p className="mt-4 text-lg font-semibold text-white">Your next conversation begins here.</p>
+                    <p className="mt-6 text-lg font-semibold text-white">Your next conversation begins here.</p>
                     <p className="mt-2 text-sm leading-6 text-zinc-400">Start with a prompt and Nexus-AI will respond in a polished, real-time chat experience.</p>
+                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                      {['Ask for a summary', 'Plan a trip', 'Draft an email'].map((s) => (
+                        <button key={s} onClick={() => { setDraft(s); textareaRef.current?.focus(); }} className="rounded-xl border border-white/8 bg-white/4 px-4 py-2 text-sm text-white hover:bg-white/6 transition">
+                          {s}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               ) : (
-                <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+                <div className="flex w-full flex-1 flex-col gap-4">
                   {messages.map((message, index) => {
                     const isLastAssistant = message.role === 'assistant' && index === messages.length - 1 && isGenerating && !message.content;
                     return (
@@ -474,7 +481,7 @@ export default function ChatPage() {
               )}
             </div>
 
-            <div className="border-t border-white/10 bg-zinc-900/50 px-3 py-3 sm:px-4 sm:py-4">
+            <div className="border-t border-white/10 bg-zinc-900/50 px-2 py-2 sm:px-3 sm:py-3">
               {error ? (
                 <div className="mx-auto mb-4 max-w-3xl rounded-[1.3rem] border border-rose-400/10 bg-rose-500/10 p-4 text-sm text-white shadow-[0_0_40px_rgba(220,38,38,0.12)]">
                   <div className="flex items-start gap-3">
