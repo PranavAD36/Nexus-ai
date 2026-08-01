@@ -41,9 +41,11 @@ export default function ChatPage() {
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [autoTitleApplied, setAutoTitleApplied] = useState<Record<string, boolean>>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const hasAutoCreatedChatRef = useRef(false);
   const router = useRouter();
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -75,7 +77,19 @@ export default function ChatPage() {
         const chatList = await getChats();
         if (!isMounted) return;
         setChats(chatList as ChatSummary[]);
-        if (chatList.length > 0 && !activeChatId) {
+
+        if (!hasAutoCreatedChatRef.current) {
+          hasAutoCreatedChatRef.current = true;
+          const newChat = await createChatRecord('New Chat');
+          if (newChat) {
+            setChats((prev) => [newChat as ChatSummary, ...prev]);
+            setActiveChatId(newChat.id);
+            setMessages([]);
+            setDraft('');
+          } else if (chatList.length > 0) {
+            setActiveChatId(chatList[0].id);
+          }
+        } else if (chatList.length > 0 && !activeChatId) {
           setActiveChatId(chatList[0].id);
         }
       } catch {
@@ -333,9 +347,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex h-screen max-w-7xl flex-col px-3 py-3 sm:px-4 lg:px-6">
-        <div className="flex flex-1 overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/80 shadow-[0_0_80px_rgba(6,10,20,0.35)] backdrop-blur-xl">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(161,161,170,0.16),transparent_24%),linear-gradient(135deg,_#09090b_0%,_#111827_45%,_#18181b_100%)] text-zinc-100">
+      <div className="mx-auto flex h-screen max-w-7xl flex-col px-2 py-2 sm:px-3 lg:px-4">
+        <div className="flex flex-1 overflow-hidden rounded-[1.85rem] border border-white/10 bg-zinc-950/80 shadow-[0_0_120px_rgba(2,6,23,0.35)] backdrop-blur-xl">
           <Sidebar
             chats={filteredChats}
             activeChatId={activeChatId}
@@ -357,39 +371,44 @@ export default function ChatPage() {
             isMobileVisible={showSidebarOnMobile}
             onClose={() => setShowSidebarOnMobile(false)}
             isLoading={isChatsLoading}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
           />
 
           <div className="flex flex-1 flex-col">
-            <header className="flex items-center justify-between border-b border-white/10 px-3 py-3 sm:px-4">
+            <header className="flex items-center justify-between border-b border-white/10 bg-zinc-900/60 px-3 py-3 sm:px-4">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="rounded-2xl lg:hidden" onClick={() => setShowSidebarOnMobile((prev) => !prev)}>
+                <Button variant="ghost" size="sm" className="rounded-2xl lg:hidden" onClick={() => setShowSidebarOnMobile((prev) => !prev)} aria-label="Toggle sidebar">
                   {showSidebarOnMobile ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
                 </Button>
+                <Button variant="ghost" size="sm" className="hidden rounded-2xl lg:flex" onClick={() => setIsSidebarCollapsed((prev) => !prev)} aria-label="Collapse sidebar">
+                  {isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+                </Button>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-200/70">Conversation</p>
+                  <p className="text-[10px] uppercase tracking-[0.35em] text-zinc-400">Conversation</p>
                   <h3 className="mt-1 text-sm font-semibold text-white sm:text-base">{currentChatTitle}</h3>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat} className="rounded-2xl">
+                <Button variant="ghost" size="sm" onClick={handleCreateChat} disabled={isCreatingChat} className="rounded-2xl border border-white/10 bg-white/5 px-3 text-sm">
                   {isCreatingChat ? 'Creating…' : 'New Chat'}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setShowSettings((prev) => !prev)} className="rounded-2xl">
+                <Button variant="ghost" size="sm" onClick={() => setShowSettings((prev) => !prev)} className="rounded-2xl" aria-label="Open settings">
                   <Settings2 size={15} />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-2xl">
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-2xl" aria-label="Log out">
                   <LogOut size={15} />
                 </Button>
               </div>
             </header>
 
             {showSettings ? (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mx-3 mt-3 rounded-[1.3rem] border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300 shadow-[0_0_40px_rgba(15,23,42,0.2)] sm:mx-4">
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mx-3 mt-3 rounded-[1.3rem] border border-white/10 bg-zinc-900/70 p-4 text-sm text-zinc-300 shadow-[0_0_40px_rgba(15,23,42,0.24)] sm:mx-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-white">Workspace settings</p>
-                    <p className="mt-1 text-xs text-slate-400">Theme, motion, and conversation controls.</p>
+                    <p className="mt-1 text-xs text-zinc-400">Theme, motion, and conversation controls.</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setShowSettings(false)} className="rounded-2xl">
                     Close
@@ -397,11 +416,11 @@ export default function ChatPage() {
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Theme</p>
-                    <p className="mt-1 text-sm text-white">Dark mode is active by default.</p>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-400">Theme</p>
+                    <p className="mt-1 text-sm text-white">Neutral slate and zinc palette.</p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Animation</p>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-400">Animation</p>
                     <p className="mt-1 text-sm text-white">Smooth motion is enabled for a premium feel.</p>
                   </div>
                 </div>
@@ -412,26 +431,28 @@ export default function ChatPage() {
               {isMessagesLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((index) => (
-                    <div key={index} className="animate-pulse rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-6">
-                      <div className="mb-4 h-4 w-3/4 rounded-full bg-slate-800" />
+                    <div key={index} className="animate-pulse rounded-[1.5rem] border border-white/10 bg-zinc-900/70 p-6">
+                      <div className="mb-4 h-4 w-3/4 rounded-full bg-zinc-800" />
                       <div className="space-y-3">
-                        <div className="h-3 w-full rounded-full bg-slate-800" />
-                        <div className="h-3 w-5/6 rounded-full bg-slate-800" />
-                        <div className="h-3 w-2/3 rounded-full bg-slate-800" />
+                        <div className="h-3 w-full rounded-full bg-zinc-800" />
+                        <div className="h-3 w-5/6 rounded-full bg-zinc-800" />
+                        <div className="h-3 w-2/3 rounded-full bg-zinc-800" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex h-full items-center justify-center rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/60 p-8 text-center text-slate-300">
-                  <div>
-                    <Sparkles className="mx-auto mb-3 text-violet-300" size={28} />
-                    <p className="text-lg text-white">Your next conversation begins here.</p>
-                    <p className="mt-2 text-sm text-slate-400">Ask anything and Nexus-AI will respond in real time.</p>
+                <div className="flex h-full items-center justify-center rounded-[1.55rem] border border-dashed border-white/10 bg-zinc-900/50 p-8 text-center text-zinc-300">
+                  <div className="max-w-md">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-violet-200">
+                      <Sparkles size={24} />
+                    </div>
+                    <p className="mt-4 text-lg font-semibold text-white">Your next conversation begins here.</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-400">Start with a prompt and Nexus-AI will respond in a polished, real-time chat experience.</p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
                   {messages.map((message, index) => {
                     const isLastAssistant = message.role === 'assistant' && index === messages.length - 1 && isGenerating && !message.content;
                     return (
@@ -445,14 +466,14 @@ export default function ChatPage() {
               )}
             </div>
 
-            <div className="border-t border-white/10 px-3 py-3 sm:px-4 sm:py-4">
+            <div className="border-t border-white/10 bg-zinc-900/50 px-3 py-3 sm:px-4 sm:py-4">
               {error ? (
-                <div className="mb-4 rounded-[1.4rem] border border-rose-400/10 bg-rose-500/10 p-4 text-sm text-white shadow-[0_0_40px_rgba(220,38,38,0.12)]">
+                <div className="mx-auto mb-4 max-w-3xl rounded-[1.3rem] border border-rose-400/10 bg-rose-500/10 p-4 text-sm text-white shadow-[0_0_40px_rgba(220,38,38,0.12)]">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle size={20} className="mt-0.5 text-rose-300" />
+                    <AlertTriangle size={18} className="mt-0.5 text-rose-300" />
                     <div>
                       <p className="font-semibold">AI service is temporarily unavailable.</p>
-                      <p className="mt-1 text-sm text-slate-300">{error}</p>
+                      <p className="mt-1 text-sm text-zinc-300">{error}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-3">
@@ -480,6 +501,6 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

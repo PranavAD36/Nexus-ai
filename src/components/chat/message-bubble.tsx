@@ -25,10 +25,10 @@ export function MessageBubble({ role, content, onCopy, onRegenerate }: MessageBu
       className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[92%] rounded-[1.35rem] border px-4 py-3 shadow-[0_0_45px_rgba(15,23,42,0.25)] sm:max-w-[78%] ${
+        className={`max-w-[92%] rounded-[1.35rem] border px-4 py-3 shadow-[0_0_30px_rgba(15,23,42,0.16)] sm:max-w-[78%] ${
           role === 'user'
-            ? 'border-cyan-400/25 bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-cyan-50'
-            : 'border-white/10 bg-slate-900/80 text-slate-100'
+            ? 'border-zinc-400/20 bg-gradient-to-br from-zinc-200/15 to-zinc-500/10 text-zinc-50'
+            : 'border-white/10 bg-zinc-900/80 text-zinc-100'
         }`}
       >
         {isAssistant && content ? (
@@ -42,7 +42,7 @@ export function MessageBubble({ role, content, onCopy, onRegenerate }: MessageBu
           </div>
         ) : null}
 
-        <div className="text-sm leading-7">
+        <div className="text-[15px] leading-7 text-zinc-100">
           {isAssistant && content ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
