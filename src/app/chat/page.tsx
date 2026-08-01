@@ -175,6 +175,10 @@ export default function ChatPage() {
       setActiveChatId(newChat.id);
       setMessages([]);
       setDraft('');
+      setTitleEditing(null);
+      setTitleDraft('');
+      setAutoTitleApplied((prev) => ({ ...prev, [newChat.id]: false }));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch {
       setError('Unable to create a new chat.');
     } finally {
@@ -343,6 +347,10 @@ export default function ChatPage() {
   const handleLogout = async () => {
     const supabase = getSupabase();
     await supabase.auth.signOut();
+    if (typeof window !== 'undefined') {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    }
     router.replace('/');
   };
 
@@ -472,8 +480,12 @@ export default function ChatPage() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle size={18} className="mt-0.5 text-rose-300" />
                     <div>
-                      <p className="font-semibold">AI service is temporarily unavailable.</p>
-                      <p className="mt-1 text-sm text-zinc-300">{error}</p>
+                      <p className="font-semibold">AI is temporarily unavailable.</p>
+                      <p className="mt-1 text-sm text-zinc-300">
+                        {/(quota|429|rate limit|too many requests|quota exceeded)/i.test(error)
+                          ? 'Please try again later.'
+                          : error}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-3">

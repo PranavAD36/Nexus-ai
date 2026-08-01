@@ -42,7 +42,15 @@
     };
 
     const signOut = async () => {
-      await getSupabase().auth.signOut();
+      const supabase = getSupabase();
+      await supabase.auth.signOut();
+      await supabase.auth.getSession();
+      if (typeof window !== 'undefined') {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+      }
+      setIsSignedIn(false);
+      setLoading(false);
     };
 
     if (loading) {
