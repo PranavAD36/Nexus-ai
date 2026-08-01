@@ -9,28 +9,30 @@
   export function AuthButton() {
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [loading, setLoading] = useState(true);
-  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+    const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
-  const getSupabase = () => {
-    if (!supabaseRef.current) {
-      supabaseRef.current = createClient();
-    }
-    return supabaseRef.current;
-  };
+    const getSupabase = () => {
+      if (!supabaseRef.current) {
+        supabaseRef.current = createClient();
+      }
+      return supabaseRef.current;
+    };
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await getSupabase().auth.getSession();
+    useEffect(() => {
+      const getSession = async () => {
+        const { data } = await getSupabase().auth.getSession();
+        setIsSignedIn(Boolean(data.session));
+        setLoading(false);
       };
 
       getSession();
 
-      const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: authListener } = getSupabase().auth.onAuthStateChange((_event, session) => {
         setIsSignedIn(Boolean(session));
       });
 
       return () => authListener.subscription.unsubscribe();
-    }, [supabase]);
+    }, []);
 
     const signInWithGoogle = async () => {
       await getSupabase().auth.signInWithOAuth({
