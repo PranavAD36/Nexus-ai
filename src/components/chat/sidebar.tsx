@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { MessageSquarePlus, PencilLine, Search, Sparkles, Trash2, Pin, PinOff } from 'lucide-react';
+import { MessageSquarePlus, PencilLine, Search, Sparkles, Trash2, Pin, PinOff, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ChatSummary {
@@ -36,50 +36,32 @@ interface ConversationSidebarProps {
   isLoading?: boolean;
 }
 
-export function WorkspaceSidebar({ chats, onCreateChat, isCreatingChat, isCollapsed, onToggleCollapse }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({ onCreateChat, isCreatingChat, isCollapsed, onToggleCollapse }: WorkspaceSidebarProps) {
   return (
-    <aside className="hidden lg:flex flex-none w-24 flex-col border-r border-white/10 bg-zinc-950/95 p-3 shadow-2xl backdrop-blur-xl">
-      <div className="flex h-full flex-col justify-between gap-4">
-        <div>
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-zinc-800 to-zinc-900 text-zinc-100 shadow-lg">
-            <Sparkles size={22} />
-          </div>
-          <div className="space-y-1 text-left">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-zinc-400">Nexus-AI</p>
-            <p className="text-sm font-semibold text-white">Workspace</p>
-          </div>
+    <aside className="hidden min-h-0 w-16 flex-none flex-col items-center border-r border-white/10 bg-black px-2 py-3 lg:flex">
+      <div className="flex h-full w-full flex-col items-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-100">
+          <Sparkles size={22} />
         </div>
 
-        <div className="space-y-3">
+        <div className="mt-5 flex w-full flex-col items-center gap-2">
           <button
             type="button"
             onClick={onCreateChat}
             disabled={isCreatingChat}
-            className="flex w-full items-center justify-center rounded-2xl border border-violet-400/25 bg-violet-500/15 px-2 py-3 text-sm text-violet-50 transition hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-300 transition hover:bg-zinc-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="New chat"
           >
-            New Chat
+            <MessageSquarePlus size={19} />
           </button>
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-2 py-3 text-sm text-white transition hover:bg-white/10"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+            aria-label={isCollapsed ? 'Expand workspace sidebar' : 'Collapse workspace sidebar'}
           >
-            {isCollapsed ? 'Expand' : 'Collapse'}
+            {isCollapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
           </button>
-        </div>
-
-        <div className="space-y-3 rounded-[1.35rem] border border-white/10 bg-zinc-900/70 p-4 shadow-[0_0_30px_rgba(15,23,42,0.18)]">
-          <div className="text-sm font-semibold text-white">Overview</div>
-          <div className="grid gap-2 text-sm text-zinc-300">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="uppercase tracking-[0.25em] text-[10px] text-zinc-500">Chats</p>
-              <p className="mt-1 font-medium text-white">{chats.length} total</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-              <p className="uppercase tracking-[0.25em] text-[10px] text-zinc-500">Pinned</p>
-              <p className="mt-1 font-medium text-white">{chats.filter((chat) => chat.pinned).length} saved</p>
-            </div>
-          </div>
         </div>
       </div>
     </aside>
@@ -103,7 +85,7 @@ export function ConversationSidebar({
   isLoading = false,
 }: ConversationSidebarProps) {
   return (
-    <aside className="flex flex-none w-80 flex-col border-r border-white/10 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl">
+    <aside className="hidden min-h-0 w-64 flex-none flex-col border-r border-white/10 bg-black p-3 md:flex lg:w-72">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.35em] text-zinc-400">Conversation</p>
@@ -125,7 +107,7 @@ export function ConversationSidebar({
           />
         </div>
       </div>
-      <div className="mt-5 flex-1 space-y-3 overflow-y-auto pr-1">
+      <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
         {isLoading ? (
           [1, 2, 3].map((index) => (
             <div key={index} className="h-20 rounded-[1.1rem] border border-white/10 bg-zinc-900/70 p-4 animate-pulse" />
@@ -198,4 +180,3 @@ export function ConversationSidebar({
     </aside>
   );
 }
-

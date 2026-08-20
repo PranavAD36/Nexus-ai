@@ -20,7 +20,7 @@ export function Composer({ draft, onDraftChange, onSend, onKeyDown, isGenerating
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="mx-auto w-full max-w-3xl rounded-[1rem] border border-white/8 bg-zinc-900/85 p-3 shadow-[0_6px_30px_rgba(2,6,23,0.5)]"
+      className="mx-auto w-full max-w-3xl rounded-[1.65rem] border border-white/5 bg-[#212121] p-2.5 shadow-lg sm:p-3"
     >
       <textarea
         ref={textareaRef}
@@ -28,10 +28,10 @@ export function Composer({ draft, onDraftChange, onSend, onKeyDown, isGenerating
         onChange={(event) => onDraftChange(event.target.value)}
         onKeyDown={onKeyDown}
         placeholder="Ask Nexus-AI anything..."
-        className="min-h-[72px] w-full resize-none rounded-xl bg-transparent px-3 py-2 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500"
+        className="min-h-[58px] w-full resize-none rounded-xl bg-transparent px-3 py-2 text-[15px] leading-6 text-zinc-100 outline-none placeholder:text-zinc-500"
         disabled={disabled}
       />
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">
           <button className="rounded-full border border-white/8 bg-white/3 p-2 text-zinc-300 transition hover:bg-white/6 hover:text-white" aria-label="Attach file">
             <Paperclip size={15} />
@@ -40,8 +40,8 @@ export function Composer({ draft, onDraftChange, onSend, onKeyDown, isGenerating
             <Mic size={15} />
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-2 rounded-full border border-zinc-400/12 bg-zinc-800/60 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-zinc-300 sm:flex">
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden items-center gap-2 rounded-full border border-zinc-400/12 bg-zinc-800/60 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-zinc-300 sm:flex">
             <Sparkles size={12} />
             Stream ready
           </div>
