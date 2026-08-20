@@ -1,4 +1,4 @@
-import { streamGeminiResponse } from '@/lib/gemini';
+import { streamOpenRouterResponse } from '@/lib/openrouter';
 
 export async function POST(request: Request) {
   try {
@@ -9,14 +9,14 @@ export async function POST(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          await streamGeminiResponse(messages, (chunk) => {
+          await streamOpenRouterResponse(messages, (chunk) => {
             controller.enqueue(encoder.encode(chunk));
           });
 
           controller.close();
         } catch (err) {
-          console.error("Gemini Stream Error:", err);
-          const message = err instanceof Error ? err.message : "Unknown Gemini Error";
+          console.error('OpenRouter Stream Error:', err);
+          const message = err instanceof Error ? err.message : 'Unknown OpenRouter Error';
           const isQuota = /quota|429|rate limit|too many requests|quota exceeded/i.test(message);
           const errorPayload = {
             error: isQuota

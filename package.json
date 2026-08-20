@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@react-three/drei": "^9.121.3",
     "@react-three/fiber": "^8.17.21",
