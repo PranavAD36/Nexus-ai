@@ -15,6 +15,7 @@ interface ComposerProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
+
 export function Composer({ draft, onDraftChange, onSend, onKeyDown, isGenerating, disabled, textareaRef }: ComposerProps) {
   return (
     <motion.div
