@@ -1,5 +1,6 @@
 "use client";
 
+
 import { motion } from 'framer-motion';
 import { ArrowUp, Paperclip, Mic, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
